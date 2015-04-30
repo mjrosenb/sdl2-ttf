@@ -4,10 +4,10 @@ module Main where
 import System.Exit
 import Control.Monad.State.Strict
 
-import Graphics.UI.SDL as SDL
-import Graphics.UI.SDL.Image as Image
-import Graphics.UI.SDL.TTF as TTF
-import Graphics.UI.SDL.TTF.Types as TTF
+import SDL as SDL
+import SDL.Image as Image
+import SDL.TTF as TTF
+import SDL.TTF.Types as TTF
 
 
 data Text = Text String Color !Int
