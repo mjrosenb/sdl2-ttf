@@ -1,6 +1,7 @@
+{-# LANGUAGE OverloadedStrings #-}
 -----------------------------------------------------------------------
 -- |
--- Module      :  Graphics.UI.SDL.TTF
+-- Module      :  SDL.TTF
 --
 -- Introduction from SDL_ttf documentation at:
 -- <http://www.libsdl.org/projects/SDL_ttf/docs/SDL_ttf.html>
@@ -23,7 +24,7 @@
 -- 
 -- Enjoy! -Sam Lantinga slouken@devolution.com (5/1/98)
 -----------------------------------------------------------------------	
-module Graphics.UI.SDL.TTF where
+module SDL.TTF where
 
 import Foreign.C.String
 import Foreign.C.Types (CInt)
@@ -34,12 +35,13 @@ import Foreign.Ptr
 import Control.Monad
 import Data.Int
 
-import Graphics.UI.SDL.TTF.FFI (TTFFont)
+import SDL.TTF.FFI (TTFFont)
 
-import qualified Graphics.UI.SDL.TTF.FFI as FFI
-import Graphics.UI.SDL.TTF.Types
-import Graphics.UI.SDL.Types
-
+import qualified SDL.TTF.FFI as FFI
+import SDL.TTF.Types
+import SDL.Raw.Types hiding (Surface(..))
+import SDL.Video.Renderer (Surface(..))
+import SDL.Exception
 import Prelude hiding (init)
 
 -- | Initialize the truetype font API.
@@ -280,9 +282,9 @@ sizeUNICODE = peekInts FFI.sizeUNICODE
 renderTextSolid :: TTFFont          -- ^ Font 
                 -> String           -- ^ The LATIN1 null terminated string to render.
                 -> Color            -- ^ The color to render the text in. Colormap index 1.
-                -> IO (Ptr Surface) -- ^ Pointer to a new SDL_Surface. NULL is returned on errors.
-renderTextSolid fontPtr text fg = withCString text $ \cstr -> do
-    with fg $ \colorPtr -> FFI.renderTextSolid fontPtr cstr colorPtr
+                -> IO (Surface) -- ^ Pointer to a new SDL_Surface. NULL is returned on errors.
+renderTextSolid fontPtr text fg = fmap SDL.Video.Renderer.Surface $ withCString text $ \cstr -> do
+    with fg $ \colorPtr ->  FFI.renderTextSolid fontPtr cstr colorPtr
     
 -- | Render the LATIN1 encoded text, using the Shaded mode
 --
@@ -294,11 +296,11 @@ renderTextShaded :: TTFFont          -- ^ Font
                  -> String           -- ^ The LATIN1 null terminated string to render.
                  -> Color            -- ^ The color to render the text in. Colormap index 1.
                  -> Color            -- ^ The color to render the background box in. Colormap index 0.
-                 -> IO (Ptr Surface) -- ^ Pointer to a new SDL_Surface. NULL is returned on errors.
+                 -> IO (Surface) -- ^ Pointer to a new SDL_Surface. NULL is returned on errors.
 renderTextShaded fontPtr text fg bg = withCString text $ \cstr ->
     with fg $ \fgColorPtr ->
       with bg $ \bgColorPtr ->
-        FFI.renderTextShaded fontPtr cstr fgColorPtr bgColorPtr
+        SDL.Video.Renderer.Surface <$> FFI.renderTextShaded fontPtr cstr fgColorPtr bgColorPtr
 
 -- | Render the LATIN1 encoded text, using the Blended mode
 --
@@ -309,9 +311,9 @@ renderTextShaded fontPtr text fg bg = withCString text $ \cstr ->
 renderTextBlended :: TTFFont          -- ^ Font 
                   -> String           -- ^ The LATIN1 null terminated string to render.
                   -> Color            -- ^ The color to render the text in. Colormap index 1.
-                  -> IO (Ptr Surface) -- ^ Pointer to a new SDL_Surface. NULL is returned on errors.
+                  -> IO (Surface) -- ^ Pointer to a new SDL_Surface. NULL is returned on errors.
 renderTextBlended fontPtr text color = withCString text $ \cstr ->
-    with color $ \colorPtr -> FFI.renderTextBlended fontPtr cstr colorPtr
+    with color $ \colorPtr -> SDL.Video.Renderer.Surface <$> FFI.renderTextBlended fontPtr cstr colorPtr
 
 -- | Render the UTF8 encoded text, using the Solid mode
 --
@@ -322,9 +324,9 @@ renderTextBlended fontPtr text color = withCString text $ \cstr ->
 renderUTF8Solid :: TTFFont            -- ^ Font 
                   -> String           -- ^ The UTF8 null terminated string to render.
                   -> Color            -- ^ The color to render the text in. Colormap index 1.
-                  -> IO (Ptr Surface) -- ^ Pointer to a new SDL_Surface. NULL is returned on errors.
+                  -> IO (Surface) -- ^ Pointer to a new SDL_Surface. NULL is returned on errors.
 renderUTF8Solid fontPtr text fg = withCString text $ \cstr -> do
-    with fg $ \colorPtr -> FFI.renderUTF8Solid fontPtr cstr colorPtr
+    with fg $ \colorPtr -> SDL.Video.Renderer.Surface <$> FFI.renderUTF8Solid fontPtr cstr colorPtr
     
 -- | Render the UTF8 encoded text, using the Shaded mode
 --
@@ -336,11 +338,11 @@ renderUTF8Shaded :: TTFFont          -- ^ Font
                  -> String           -- ^ The UTF8 null terminated string to render.
                  -> Color            -- ^ The color to render the text in. Colormap index 1.
                  -> Color            -- ^ The color to render the background box in. Colormap index 0.
-                 -> IO (Ptr Surface) -- ^ Pointer to a new SDL_Surface. NULL is returned on errors.
+                 -> IO (Surface) -- ^ Pointer to a new SDL_Surface. NULL is returned on errors.
 renderUTF8Shaded fontPtr text fg bg = withCString text $ \cstr ->
     with fg $ \fgColorPtr ->
       with bg $ \bgColorPtr ->
-        FFI.renderUTF8Shaded fontPtr cstr fgColorPtr bgColorPtr
+        SDL.Video.Renderer.Surface <$> FFI.renderUTF8Shaded fontPtr cstr fgColorPtr bgColorPtr
 
 -- | Render the UTF8 encoded text, using the Blended mode
 --
@@ -351,9 +353,9 @@ renderUTF8Shaded fontPtr text fg bg = withCString text $ \cstr ->
 renderUTF8Blended :: TTFFont          -- ^ Font 
                   -> String           -- ^ The UTF8 null terminated string to render.
                   -> Color            -- ^ The color to render the text in. Colormap index 1.
-                  -> IO (Ptr Surface) -- ^ Pointer to a new SDL_Surface. NULL is returned on errors.
+                  -> IO (Surface) -- ^ Pointer to a new SDL_Surface. NULL is returned on errors.
 renderUTF8Blended fontPtr text color = withCString text $ \cstr ->
-    with color $ \colorPtr -> FFI.renderUTF8Blended fontPtr cstr colorPtr
+    with color $ \colorPtr -> SDL.Video.Renderer.Surface <$> FFI.renderUTF8Blended fontPtr cstr colorPtr
 
 peekInts 
   :: (FFI.TTFFont -> CString -> Ptr CInt -> Ptr CInt -> IO CInt)
